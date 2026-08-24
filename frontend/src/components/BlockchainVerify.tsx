@@ -142,47 +142,50 @@ export default function BlockchainVerify() {
   // ── Verified state ────────────────────────────────────────
   if (status === "verified" && identity) {
     return (
-      <div>
+      <div style={{ width: "100%", boxSizing: "border-box" }}>
         {/* Verified banner */}
         <div style={{
           background: "rgba(76,175,110,0.06)", border: "1px solid rgba(76,175,110,0.25)",
-          borderRadius: "12px", padding: "16px", marginBottom: "16px",
+          borderRadius: "10px", padding: "14px 16px", marginBottom: "14px",
           display: "flex", alignItems: "center", gap: "12px",
+          width: "100%", boxSizing: "border-box"
         }}>
           <div style={{
-            width: "42px", height: "42px", borderRadius: "50%", flexShrink: 0,
+            width: "38px", height: "38px", borderRadius: "50%", flexShrink: 0,
             background: "rgba(76,175,110,0.12)", border: "1px solid rgba(76,175,110,0.3)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "20px", color: "#4caf6e"
+            fontSize: "18px", color: "#4caf6e"
           }}>
-            <CheckCircle size={24} />
+            <CheckCircle size={22} />
           </div>
-          <div>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: "13px", fontWeight: "700", color: "#4caf6e" }}>
               Blockchain Identity Verified
             </div>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px", overflowWrap: "break-word" }}>
               Verified on {formatVerifiedAt(identity.verifiedAt)} · {getChainName(identity.chainId)}
             </div>
           </div>
         </div>
 
         {/* Wallet info */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "14px", width: "100%", boxSizing: "border-box" }}>
           {[
             { label: "Wallet Address", value: identity.walletAddress, mono: true },
             { label: "Network",        value: getChainName(identity.chainId), mono: false },
             { label: "Verified",       value: formatVerifiedAt(identity.verifiedAt), mono: false },
           ].map((row) => (
             <div key={row.label} style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              padding: "10px 14px", background: "var(--bg-panel)",
+              display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px",
+              padding: "10px 12px", background: "var(--bg-panel)",
               borderRadius: "8px", border: "1px solid var(--border-gold)",
+              width: "100%", boxSizing: "border-box"
             }}>
-              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{row.label}</span>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", flexShrink: 0 }}>{row.label}</span>
               <span style={{
                 fontSize: "12px", fontWeight: "600", color: "var(--text-bright)",
                 fontFamily: row.mono ? "Courier New, monospace" : "inherit",
+                overflowWrap: "anywhere", textAlign: "right"
               }}>
                 {row.mono ? shortAddress(row.value) : row.value}
               </span>
@@ -191,73 +194,86 @@ export default function BlockchainVerify() {
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
           <button
             onClick={handleCopyAddress}
             style={{
+              flex: "1 1 auto", minWidth: "120px",
               padding: "8px 14px", borderRadius: "8px", cursor: "pointer",
               background: copiedAddress ? "rgba(76,175,110,0.1)" : "rgba(212, 175, 55,0.08)",
               border: `1px solid ${copiedAddress ? "rgba(76,175,110,0.3)" : "rgba(212, 175, 55,0.3)"}`,
               color: copiedAddress ? "#4caf6e" : "var(--gold-mid)",
+              fontSize: "12px", fontFamily: "Raleway, sans-serif", fontWeight: "600",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              boxSizing: "border-box"
             }}
           >
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              {copiedAddress ? <CheckCircle size={14} /> : <Copy size={14} />}
-              {copiedAddress ? "Copied!" : "Copy Address"}
-            </span>
+            {copiedAddress ? <CheckCircle size={14} /> : <Copy size={14} />}
+            <span>{copiedAddress ? "Copied!" : "Copy Address"}</span>
           </button>
 
-          
-            <a
+          <a
             href={getEtherscanLink(identity.walletAddress, identity.chainId)}
             target="_blank"
             rel="noopener noreferrer"
             style={{
+              flex: "1 1 auto", minWidth: "130px",
               padding: "8px 14px", borderRadius: "8px",
               background: "none", border: "1px solid var(--border-gold)",
               color: "var(--text-muted)", fontSize: "12px",
               fontFamily: "Raleway, sans-serif", textDecoration: "none",
-              display: "flex", alignItems: "center", gap: "6px"
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              boxSizing: "border-box"
             }}
-          ><ExternalLink size={14} /> View on Explorer ↗</a>
+          >
+            <ExternalLink size={14} /> View on Explorer ↗
+          </a>
 
           <button
             onClick={handleRevoke}
             style={{
+              flex: "1 1 auto", minWidth: "90px",
               padding: "8px 14px", borderRadius: "8px", cursor: "pointer",
               background: "rgba(217,48,37,0.06)",
               border: "1px solid rgba(217,48,37,0.2)",
               color: "#e84234", fontSize: "12px",
               fontFamily: "Raleway, sans-serif",
-              marginLeft: "auto",
-              display: "flex", alignItems: "center", gap: "6px"
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              boxSizing: "border-box"
             }}
-          ><Trash2 size={14} /> Revoke</button>
+          >
+            <Trash2 size={14} /> Revoke
+          </button>
         </div>
       </div>
-        )
+    )
   }
 
   // ── Unverified / pending state ────────────────────────────
   return (
-    <div>
+    <div style={{ width: "100%", boxSizing: "border-box" }}>
       {/* No wallet warning */}
       {!walletAvailable && (
         <div style={{
           background: "rgba(212, 175, 55,0.06)", border: "1px solid rgba(212, 175, 55,0.2)",
-          borderRadius: "10px", padding: "12px 16px", marginBottom: "16px",
-          fontSize: "12px", color: "var(--gold-mid)", lineHeight: "1.6",
-          display: "flex", alignItems: "center", gap: "8px"
+          borderRadius: "10px", padding: "12px 14px", marginBottom: "14px",
+          fontSize: "12px", color: "var(--gold-mid)", lineHeight: "1.5",
+          display: "flex", alignItems: "flex-start", gap: "10px",
+          overflowWrap: "anywhere", wordBreak: "break-word",
+          width: "100%", boxSizing: "border-box"
         }}>
-          <AlertCircle size={14} /> No Ethereum wallet detected. Install{" "}
-          <a href="https://metamask.io" target="_blank" rel="noopener noreferrer"
-            style={{ color: "var(--gold-mid)", fontWeight: "700" }}>MetaMask</a>
-          {" "}or another Web3 wallet to verify your identity.
+          <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            No Ethereum wallet detected. Install{" "}
+            <a href="https://metamask.io" target="_blank" rel="noopener noreferrer"
+              style={{ color: "var(--gold-mid)", fontWeight: "700", textDecoration: "underline" }}>MetaMask</a>
+            {" "}or another Web3 wallet to verify your identity.
+          </div>
         </div>
       )}
 
       {/* Steps */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px", width: "100%", boxSizing: "border-box" }}>
         {[
           { n: 1, label: "Connect your Ethereum wallet",       done: step !== "idle" },
           { n: 2, label: "Sign a message (no gas required)",   done: step === "storing" || step === "done" },
@@ -265,8 +281,9 @@ export default function BlockchainVerify() {
         ].map((s) => (
           <div key={s.n} style={{
             display: "flex", alignItems: "center", gap: "10px",
-            padding: "10px 14px", background: "var(--bg-panel)",
+            padding: "10px 12px", background: "var(--bg-panel)",
             borderRadius: "8px", border: `1px solid ${s.done ? "rgba(76,175,110,0.25)" : "var(--border-gold)"}`,
+            width: "100%", boxSizing: "border-box"
           }}>
             <div style={{
               width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
@@ -278,7 +295,7 @@ export default function BlockchainVerify() {
             }}>
               {s.done ? "✓" : s.n}
             </div>
-            <span style={{ fontSize: "12px", color: s.done ? "#4caf6e" : "var(--text-bright)" }}>
+            <span style={{ fontSize: "12px", color: s.done ? "#4caf6e" : "var(--text-bright)", flex: 1, minWidth: 0, overflowWrap: "break-word" }}>
               {s.label}
             </span>
             {status === "pending" && (
@@ -287,7 +304,7 @@ export default function BlockchainVerify() {
               (s.n === 3 && step === "storing")
             ) && (
               <span style={{
-                marginLeft: "auto", display: "inline-block",
+                marginLeft: "auto", display: "inline-block", flexShrink: 0,
                 width: "12px", height: "12px",
                 border: "2px solid rgba(212, 175, 55,0.2)",
                 borderTop: "2px solid var(--gold-mid)",
@@ -302,9 +319,14 @@ export default function BlockchainVerify() {
       {error && (
         <div style={{
           padding: "10px 14px", borderRadius: "8px", marginBottom: "14px",
-          border: "1px solid rgba(217,48,37,0.25)",
-          display: "flex", alignItems: "center", gap: "8px"
-        }}><AlertCircle size={14} /> {error}</div>
+          background: "rgba(217,48,37,0.06)", border: "1px solid rgba(217,48,37,0.25)",
+          color: "#e84234", fontSize: "12px",
+          display: "flex", alignItems: "center", gap: "8px",
+          width: "100%", boxSizing: "border-box"
+        }}>
+          <AlertCircle size={14} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1, minWidth: 0, overflowWrap: "break-word" }}>{error}</span>
+        </div>
       )}
 
       {/* Current wallet */}
@@ -314,8 +336,9 @@ export default function BlockchainVerify() {
           background: "rgba(76,175,110,0.06)", border: "1px solid rgba(76,175,110,0.2)",
           fontSize: "12px", color: "#4caf6e",
           display: "flex", alignItems: "center", gap: "8px",
+          width: "100%", boxSizing: "border-box"
         }}>
-          <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" alt="MetaMask" style={{ width: "16px", height: "16px" }} />
+          <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" alt="MetaMask" style={{ width: "16px", height: "16px", flexShrink: 0 }} />
           <span style={{ fontFamily: "Courier New, monospace" }}>{shortAddress(walletAddress)}</span>
           <span style={{ color: "var(--text-muted)", marginLeft: "4px" }}>
             · {getChainName(chainId)}
@@ -328,7 +351,9 @@ export default function BlockchainVerify() {
         onClick={handleVerify}
         disabled={status === "pending" || !walletAvailable}
         style={{
-          padding: "11px 24px", borderRadius: "10px", cursor: "pointer",
+          width: "100%",
+          minHeight: "46px",
+          padding: "12px 20px", borderRadius: "10px", cursor: walletAvailable && status !== "pending" ? "pointer" : "default",
           background: walletAvailable
             ? "linear-gradient(135deg, var(--gold-rich), var(--gold-light))"
             : "rgba(212, 175, 55,0.1)",
@@ -337,19 +362,22 @@ export default function BlockchainVerify() {
           fontSize: "13px", fontFamily: "Raleway, sans-serif", fontWeight: "700",
           boxShadow: walletAvailable ? "0 2px 12px rgba(212, 175, 55,0.3)" : "none",
           opacity: status === "pending" ? 0.7 : 1,
-          display: "flex", alignItems: "center", gap: "8px",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+          boxSizing: "border-box"
         }}
       >
         {status === "pending" ? (
           <>
             <span style={{
-              display: "inline-block", width: "12px", height: "12px",
+              display: "inline-block", width: "14px", height: "14px", flexShrink: 0,
               border: "2px solid rgba(0,0,0,0.2)", borderTop: "2px solid #000",
               borderRadius: "50%", animation: "spin 0.8s linear infinite",
             }} />
-            {step === "connecting" ? "Connecting wallet..."  :
-             step === "signing"    ? "Sign in MetaMask..."   :
-             step === "storing"    ? "Storing identity..."   : "Verifying..."}
+            <span>
+              {step === "connecting" ? "Connecting wallet..."  :
+               step === "signing"    ? "Sign in MetaMask..."   :
+               step === "storing"    ? "Storing identity..."   : "Verifying..."}
+            </span>
           </>
         ) : (
           <><LinkIcon size={16} /> Verify with Ethereum Wallet</>

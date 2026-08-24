@@ -8,7 +8,8 @@ import {
   Trash2, Key, Eye, EyeOff, Shield, 
   Download, Folder, FolderOpen, RefreshCw, 
   CheckCircle2, XCircle, AlertCircle, Sparkles,
-  ArrowRight, Mail, Database, Layout, Wallet, Search, Send, User, Check, Copy
+  ArrowRight, Mail, Database, Layout, Wallet, Search, Send, User, Check, Copy,
+  ChevronDown
 } from "lucide-react"
 import BlockchainVerify from "@/components/BlockchainVerify"
 import { getLabels, saveLabel, deleteLabel, createId, PRESET_COLORS, type Label } from "@/utils/labelStore"
@@ -392,7 +393,8 @@ export default function SettingsPage() {
 
   const card = {
     background: "var(--bg-card)", border: "1px solid var(--border-gold)",
-    borderRadius: "14px", padding: "24px", marginBottom: "16px",
+    borderRadius: "12px", padding: "16px", marginBottom: "16px",
+    width: "100%", boxSizing: "border-box" as const,
   }
 
   const labelStyle = {
@@ -450,32 +452,41 @@ export default function SettingsPage() {
     <div className="settings-container" style={{ display: "flex", height: "100%", overflow: "hidden", minWidth: 0 }}>
 
       {/* ── Mobile dropdown selector (shown only on mobile) ── */}
-      <div className="settings-mobile-select-bar" style={{ position: "relative", zIndex: 50 }}>
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-gold)" }}>
+      <div className="settings-mobile-select-bar" style={{ position: "relative", zIndex: 50, width: "100%", boxSizing: "border-box" }}>
+        <div style={{ padding: "12px 16px" }}>
           <button 
             onClick={() => setShowMobileNav(!showMobileNav)}
             style={{
-              width: "100%", padding: "10px 14px",
+              width: "100%", padding: "12px 16px",
               background: "var(--bg-panel)", border: "1px solid var(--border-gold)",
-              borderRadius: "8px", color: "var(--gold-mid)",
+              borderRadius: "10px", color: "var(--gold-mid)",
               fontFamily: "Raleway, sans-serif", fontSize: "14px",
               cursor: "pointer", outline: "none",
-              display: "flex", alignItems: "center", justifyContent: "space-between"
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              boxSizing: "border-box",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)"
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               {SECTIONS.find(s => s.key === activeSection)?.icon}
-              <span style={{ fontWeight: "700" }}>{SECTIONS.find(s => s.key === activeSection)?.label}</span>
+              <span style={{ fontWeight: "700", color: "var(--text-bright)" }}>{SECTIONS.find(s => s.key === activeSection)?.label}</span>
             </div>
-            <span style={{ transform: showMobileNav ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>▼</span>
+            <ChevronDown 
+              size={18} 
+              color="var(--gold-mid)"
+              style={{ 
+                transform: showMobileNav ? "rotate(180deg)" : "rotate(0deg)", 
+                transition: "transform 0.2s ease" 
+              }} 
+            />
           </button>
 
           {showMobileNav && (
             <div style={{
-              position: "absolute", top: "calc(100% - 8px)", left: "16px", right: "16px",
+              position: "absolute", top: "calc(100% - 4px)", left: "16px", right: "16px",
               background: "var(--bg-card)", border: "1px solid var(--border-gold)",
-              borderRadius: "8px", padding: "8px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.8)", zIndex: 100
+              borderRadius: "10px", padding: "8px",
+              boxShadow: "0 12px 36px rgba(0,0,0,0.85)", zIndex: 100
             }}>
               {SECTIONS.map((s) => (
                 <button
@@ -484,11 +495,12 @@ export default function SettingsPage() {
                   style={{
                     width: "100%", padding: "12px 14px",
                     display: "flex", alignItems: "center", gap: "12px",
-                    background: activeSection === s.key ? "rgba(212, 175, 55, 0.1)" : "transparent",
-                    border: "none", borderRadius: "6px",
+                    background: activeSection === s.key ? "rgba(212, 175, 55, 0.12)" : "transparent",
+                    border: "none", borderRadius: "8px",
                     color: activeSection === s.key ? "var(--gold-mid)" : "var(--text-bright)",
                     fontSize: "14px", fontWeight: activeSection === s.key ? "700" : "500",
-                    cursor: "pointer", textAlign: "left"
+                    cursor: "pointer", textAlign: "left",
+                    transition: "background 0.15s ease"
                   }}
                 >
                   <span style={{ color: "var(--gold-mid)", display: "flex", alignItems: "center" }}>
@@ -1012,26 +1024,29 @@ export default function SettingsPage() {
         {/* ══ BLOCKCHAIN ══════════════════════════════════════ */}
         {activeSection === "blockchain" && (
           <>
-            <h2 className="mail-detail-subject" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <LinkIcon size={22} color="var(--gold-mid)" /> Blockchain Identity
+            <h2 className="mail-detail-subject" style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "16px" }}>
+              <LinkIcon size={20} color="var(--gold-mid)" /> Blockchain Identity
             </h2>
 
             <div style={{
-              background: "rgba(212, 175, 55,0.04)", border: "1px solid rgba(212, 175, 55,0.15)",
-              borderRadius: "12px", padding: "16px", marginBottom: "20px",
-              fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.7",
+              background: "var(--bg-card)", border: "1px solid var(--border-gold)",
+              borderRadius: "12px", padding: "16px", marginBottom: "16px",
+              fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.6",
+              width: "100%", boxSizing: "border-box"
             }}>
               <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <LinkIcon size={16} /> What is Blockchain Verification?
+                <LinkIcon size={16} color="var(--gold-mid)" /> What is Blockchain Verification?
               </div>
-              Linking your Ethereum wallet to your SecureMail identity proves that you control
-              a real crypto wallet. No transaction is sent and no gas is spent — only a cryptographic signature.
-              <div style={{ marginTop: "10px", display: "flex", gap: "16px", flexWrap: "wrap" }}>
+              <p style={{ margin: "0 0 10px 0", fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.6" }}>
+                Linking your Ethereum wallet to your SecureMail identity proves that you control
+                a real crypto wallet. No transaction is sent and no gas is spent — only a cryptographic signature.
+              </p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                 {[
-                  { icon: <Sparkles size={12} />, label: "Free — no gas fees" },
-                  { icon: <Lock size={12} />, label: "No private key exposed" },
-                  { icon: <Globe size={12} />, label: "Publicly verifiable on-chain" },
-                  { icon: <CheckCircle size={12} />, label: "Works with MetaMask, Coinbase, Rainbow" },
+                  { icon: <Sparkles size={13} color="var(--gold-mid)" />, label: "Free — no gas fees" },
+                  { icon: <Lock size={13} color="var(--gold-mid)" />, label: "No private key exposed" },
+                  { icon: <Globe size={13} color="var(--gold-mid)" />, label: "Publicly verifiable on-chain" },
+                  { icon: <CheckCircle size={13} color="var(--gold-mid)" />, label: "Works with MetaMask, Coinbase, Rainbow" },
                 ].map((item) => (
                   <div key={item.label} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--text-bright)" }}>
                     {item.icon}<span>{item.label}</span>
@@ -1041,8 +1056,8 @@ export default function SettingsPage() {
             </div>
 
             <div style={card}>
-              <div style={{ marginBottom: "16px" }}>
-                <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ marginBottom: "14px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
                   <Wallet size={16} color="var(--gold-mid)" /> Connect Ethereum Wallet
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
@@ -1053,10 +1068,10 @@ export default function SettingsPage() {
             </div>
 
             <div style={card}>
-              <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <Search size={16} color="var(--gold-mid)" /> How It Works
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
                   { step: "1", title: "Connect Wallet", desc: "MetaMask opens and asks permission to connect" },
                   { step: "2", title: "Sign Message", desc: "You sign a human-readable message — no ETH sent, no gas" },
@@ -1065,18 +1080,19 @@ export default function SettingsPage() {
                 ].map((item) => (
                   <div key={item.step} style={{
                     display: "flex", alignItems: "flex-start", gap: "12px",
-                    padding: "10px 14px", background: "var(--bg-panel)",
+                    padding: "10px 12px", background: "var(--bg-panel)",
                     borderRadius: "8px", border: "1px solid var(--border-gold)",
+                    width: "100%", boxSizing: "border-box"
                   }}>
                     <div style={{
-                      width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
+                      width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
                       background: "linear-gradient(135deg, var(--gold-rich), var(--gold-light))",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: "11px", fontWeight: "800", color: "var(--bg-body)",
                     }}>{item.step}</div>
-                    <div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-bright)" }}>{item.title}</div>
-                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{item.desc}</div>
+                      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px", overflowWrap: "break-word" }}>{item.desc}</div>
                     </div>
                   </div>
                 ))}

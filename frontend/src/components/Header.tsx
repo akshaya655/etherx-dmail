@@ -341,32 +341,29 @@ function Header({ onToggle }: HeaderProps) {
           </div>
         </div>
 
-        {/* ── Mobile: search icon (visible on mobile only via CSS) ── */}
-        <button
-          suppressHydrationWarning
-          className="header-search-mobile-btn"
-          onClick={() => setShowMobileSearch(true)}
-          style={{
-            background: "none", border: "none", color: "var(--gold-mid)",
-            cursor: "pointer", padding: "10px", borderRadius: "8px",
-            display: "none", /* shown via CSS on mobile */
-            alignItems: "center", justifyContent: "center",
-            minWidth: "44px", minHeight: "44px"
-          }}
-          title="Search"
-          aria-label="Open search"
-        >
-          <Search size={22} />
-        </button>
-
         <div className="header-right" suppressHydrationWarning style={{ 
-          flex: 1, 
           display: "flex", 
           justifyContent: "flex-end", 
           alignItems: "center", 
-          gap: "24px",
-          paddingLeft: "20px"
+          gap: "12px",
         }}>
+          {/* ── Mobile: search icon (visible on mobile only via CSS) ── */}
+          <button
+            suppressHydrationWarning
+            className="header-search-mobile-btn"
+            onClick={() => setShowMobileSearch(true)}
+            style={{
+              background: "none", border: "none", color: "var(--gold-mid)",
+              cursor: "pointer", padding: "8px", borderRadius: "8px",
+              display: "none", /* shown via CSS on mobile */
+              alignItems: "center", justifyContent: "center",
+              minWidth: "44px", minHeight: "44px"
+            }}
+            title="Search"
+            aria-label="Open search"
+          >
+            <Search size={22} />
+          </button>
           
           {/* Node Status Badge — hidden on mobile */}
           <div className="header-desktop-only" style={{

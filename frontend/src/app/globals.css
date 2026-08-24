@@ -2538,10 +2538,12 @@ body {
 
   /* Settings: switch to column layout and show mobile dropdown */
   .settings-container {
+    display: flex !important;
     flex-direction: column !important;
-    overflow-y: auto !important;
-    height: auto !important;
-    min-height: 100%;
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
   }
 
   /* Hide desktop settings sidebar on mobile */
@@ -2552,16 +2554,23 @@ body {
   /* Show mobile dropdown selector */
   .settings-mobile-select-bar {
     display: block !important;
-    flex-shrink: 0;
+    background: var(--bg-panel) !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    border-bottom: 1px solid var(--border-gold) !important;
   }
 
-  /* Settings content panel: full width, scrollable */
+  /* Settings content panel: full width, scrollable with FAB clearance */
   .settings-content-panel {
     padding: 16px !important;
-    min-width: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    flex: 1;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 1 0% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Settings button rows: wrap */
@@ -3634,20 +3643,23 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* Settings container: stack vertically */
+  /* Settings container: stack vertically and scrollable */
   .settings-container {
+    display: flex !important;
     flex-direction: column !important;
-    height: auto !important;
-    min-height: 100%;
-    overflow-y: auto !important;
+    height: 100% !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
   }
 
   /* Show mobile section selector */
   .settings-mobile-select-bar {
     display: block !important;
-    background: var(--bg-panel);
-    flex-shrink: 0;
-    width: 100%;
+    background: var(--bg-panel) !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    border-bottom: 1px solid var(--border-gold) !important;
   }
 
   /* Hide desktop sidebar on mobile */
@@ -3655,11 +3667,15 @@ body {
     display: none !important;
   }
 
-  /* Settings content: full width, reasonable padding */
+  /* Settings content: full width, reasonable padding with FAB clearance */
   .settings-content-panel {
     padding: 16px !important;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
     min-width: 0 !important;
     overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 1 0% !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
@@ -3859,11 +3875,11 @@ body {
     width: 100% !important;
     max-width: 100% !important;
     border-left: none !important;
-    padding: 12px 10px !important;
+    padding: 16px 14px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* 10. MAIL ROWS — no horizontal overflow */
@@ -3894,21 +3910,24 @@ body {
 
   /* 13. SETTINGS — vertical layout, fully scrollable */
   .settings-container {
+    display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
+    width: 100% !important;
     overflow: hidden !important;
-    display: flex !important;
+    min-width: 0 !important;
   }
 
   .settings-content-panel {
     padding: 16px !important;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
     min-width: 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    flex: 1 1 auto !important;
-    -webkit-overflow-scrolling: touch;
+    flex: 1 1 0% !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* 14. SEARCH FILTER DROPDOWN — not overflow on mobile */
@@ -4164,23 +4183,28 @@ body {
     display: none !important;
   }
 
-  /* Mobile FAB */
+  /* Mobile FAB — Positioned with safe-area offset and proper size */
   .mobile-fab {
     display: flex !important;
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-rich), var(--gold-light));
-    color: var(--bg-body);
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    z-index: 500;
+    position: fixed !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 16px !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--gold-rich), var(--gold-light)) !important;
+    color: var(--bg-body) !important;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.45) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    cursor: pointer !important;
+    z-index: 90 !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  .mobile-fab:active {
+    transform: scale(0.92) !important;
   }
 
   .mobile-fab-compose {
@@ -4271,16 +4295,18 @@ body {
   }
 }
 
-.mobile-fab {
-  display: none;
+@media (min-width: 769px) {
+  .mobile-fab {
+    display: none !important;
+  }
+  .hide-on-mobile {
+    display: flex !important;
+  }
 }
 
 /* =============================================
    MOBILE NAVIGATION DRAWER (< 768px)
    ============================================= */
-.hide-on-mobile {
-  display: flex !important;
-}
 
 .mobile-drawer-overlay {
   display: none;

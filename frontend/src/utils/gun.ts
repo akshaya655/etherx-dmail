@@ -97,7 +97,8 @@ const getPeers = (): string[] => {
       peers.add(`http://127.0.0.1:8765/gun`);
     } else {
       // Production Relay deployment:
-      peers.add(`https://mailsecure.onrender.com/gun`);
+      const relayBase = process.env.NEXT_PUBLIC_GUN_RELAY || "https://mailsecure.onrender.com";
+      peers.add(`${relayBase.replace(/\/$/, "")}/gun`);
     }
 
     // 3. [Discovery] Previously successful relays

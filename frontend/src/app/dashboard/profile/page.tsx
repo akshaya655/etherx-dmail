@@ -244,8 +244,8 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px" }}>
-        <div style={{ maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px", paddingBottom: "calc(88px + env(safe-area-inset-bottom, 0px))" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "16px", width: "100%", boxSizing: "border-box" }}>
 
           {/* ── PROFILE CARD (Avatar, Photo Upload, Name, DMail Address) ── */}
           <div style={{

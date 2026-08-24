@@ -250,15 +250,15 @@ export default function ConversationView({
 
       <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
         {/* Subject Header Area */}
-        <div style={{ padding: "32px 32px 16px" }}>
+        <div style={{ padding: "16px 16px 12px" }}>
           <h2 style={{
-            margin: 0, fontSize: "28px", fontWeight: "500", color: "#FFFFFF",
-            fontFamily: "'Inter', sans-serif", letterSpacing: "-0.5px"
+            margin: 0, fontSize: "20px", fontWeight: "600", color: "#FFFFFF",
+            fontFamily: "'Inter', sans-serif", letterSpacing: "-0.3px", overflowWrap: "break-word"
           }}>{thread.subject}</h2>
         </div>
 
         {/* Messages List */}
-        <div ref={scrollRef} style={{ padding: "0 32px 32px" }}>
+        <div ref={scrollRef} style={{ padding: "0 16px 32px", flex: 1, paddingBottom: "calc(88px + env(safe-area-inset-bottom, 0px))" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {thread.messages.map((msg, index) => {
               const isExpanded = expandedIds.has(msg.id)

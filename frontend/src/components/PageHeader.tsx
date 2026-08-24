@@ -40,7 +40,7 @@ export default function PageHeader({
   }
 
   return (
-    <div style={{ padding: "24px 20px 0 20px", flexShrink: 0 }}>
+    <div style={{ padding: "16px 16px 0 16px", flexShrink: 0, width: "100%", boxSizing: "border-box" }}>
       {/* Header Row — unified design: icon + title + subtitle + actions */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

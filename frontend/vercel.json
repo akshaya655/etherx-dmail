@@ -2,5 +2,9 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_GUN_RELAY": "https://mailsecure.onrender.com",
+    "NEXT_PUBLIC_MAIL_DOMAIN": "etherxinnovations.in"
+  }
 }

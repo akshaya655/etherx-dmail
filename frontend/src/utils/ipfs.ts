@@ -172,10 +172,10 @@ export const getLocalNode = (port: number) => {
       const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       return `${protocol}//127.0.0.1:${port}`;
     } else {
-      // In production, the backend is hosted at the Render domain. Other ports (like 5001, 9094) do not
-      // exist in production, but for the backend port (8765) we return the Render URL.
+      // In production, the backend is hosted at the Railway / Gun relay domain. Other ports (like 5001, 9094) do not
+      // exist in production, but for the backend port (8765) we return the configured relay URL.
       if (port === 8765) {
-        return `https://mailsecure.onrender.com`;
+        return process.env.NEXT_PUBLIC_GUN_RELAY || `https://mailsecure.onrender.com`;
       }
       const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       return `${protocol}//${window.location.hostname}:${port}`;

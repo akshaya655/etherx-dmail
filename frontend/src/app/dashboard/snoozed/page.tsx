@@ -77,7 +77,7 @@ export default function SnoozedPage() {
       </div>
 
       {selectedMail && (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "32px 40px", borderLeft: "1px solid #141414", overflowY: "auto" }}>
+        <div className="mail-detail-pane" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "32px 40px", borderLeft: "1px solid #141414", overflowY: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
             <button onClick={() => setSelectedMail(null)} style={{ background: "none", border: "none", color: "var(--gold-mid)", cursor: "pointer" }}>
               <ArrowLeft size={20} />

@@ -163,7 +163,7 @@ export default function ImportantPage() {
   }
 
   const renderReader = () => (
-    <div style={{ flex: 1, overflowY: "auto", padding: "32px 40px", background: "var(--bg-panel)", animation: "fadeUp 0.3s ease both" }}>
+    <div className="mail-detail-pane" style={{ flex: 1, overflowY: "auto", padding: "32px 40px", background: "var(--bg-panel)", animation: "fadeUp 0.3s ease both" }}>
       <div style={{ marginBottom: "28px" }}>
         <button
           onClick={() => setSelectedMail(null)}

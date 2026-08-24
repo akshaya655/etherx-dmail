@@ -1,32 +1,36 @@
 # Dependencies
 node_modules/
-*/node_modules/
-.pnp
-.pnp.js
+/.pnp
+.pnp.*
 
-# Production & Build outputs
+# Next.js & Build outputs
 .next/
-*/.next/
 out/
-build/
 dist/
+build/
+*.tsbuildinfo
 
-# Environment and secrets
+# Environment & Secrets
 .env
-.env*.local
 .env.local
-.env.development
-.env.production
-.env.test
-backend/.env
-frontend/.env
-*.env
+.env.*.local
+.env*
 *.pem
 *.key
+*.cert
 
-# Data and runtime caches
-*.data
-*.tmp
+# Vercel
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Database & Runtime / Test data
+radata/
 backend/data/
 backend/radata/
 backend/data_pop3/
@@ -34,18 +38,8 @@ backend/data_test_temp/
 backend/*.tmp
 backend/gateway_config.json
 frontend/radata/
+*.data
 
-# Logs and debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-*.log
-
-# OS and IDE files
+# OS metadata
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
-*.tsbuildinfo
-tatus

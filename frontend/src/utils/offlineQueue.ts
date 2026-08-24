@@ -43,7 +43,8 @@ const getLocalRelay = () => {
       const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       return `${protocol}//127.0.0.1:8765/gun`;
     } else {
-      return `https://mailsecure.onrender.com/gun`;
+      const relayBase = process.env.NEXT_PUBLIC_GUN_RELAY || "https://mailsecure.onrender.com";
+      return `${relayBase.replace(/\/$/, "")}/gun`;
     }
   }
   return "http://localhost:8765/gun";

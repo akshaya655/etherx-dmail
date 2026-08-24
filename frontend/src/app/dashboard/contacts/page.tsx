@@ -227,7 +227,7 @@ export default function ContactsPage() {
         }
       />
 
-      <div style={{ padding: "0 20px" }}>
+      <div style={{ padding: "0 16px" }}>
         {/* Encryption notice */}
         <div style={{
           background: "rgba(76,175,110,0.06)", border: "1px solid rgba(76,175,110,0.2)",
@@ -265,7 +265,7 @@ export default function ContactsPage() {
           </p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: "12px", padding: "0 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: "12px", padding: "0 16px", paddingBottom: "calc(88px + env(safe-area-inset-bottom, 0px))" }}>
           {filteredContacts.map((contact) => (
             <div key={contact.id} style={{
               background: "var(--bg-card)", border: "1px solid var(--border-gold)",
