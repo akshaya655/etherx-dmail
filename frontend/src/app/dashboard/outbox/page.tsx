@@ -1,13 +1,33 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, Suspense } from "react"
+import { useRouter } from "next/navigation"
 import { subscribe, getMails, updateMailInStore } from "@/utils/mailStore"
 import {
   Send, RefreshCw, Trash2, AlertTriangle, RotateCcw,
   Clock, ChevronRight, ArrowLeft
 } from "lucide-react"
 
-export default function OutboxPage() {
+const formatOutboxTime = (time: string) => {
+  if (!time || isNaN(Date.parse(time))) return "Queued"
+  const d = new Date(time)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+  const itemDate = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+
+  if (itemDate.getTime() === today.getTime()) {
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  } else if (itemDate.getTime() === yesterday.getTime()) {
+    return "Yesterday"
+  } else if (d.getFullYear() === now.getFullYear()) {
+    return d.toLocaleDateString([], { month: "short", day: "numeric" })
+  }
+  return d.toLocaleDateString([], { day: "2-digit", month: "2-digit", year: "2-digit" })
+}
+
+function OutboxPageContent() {
+  const router = useRouter()
   const [mails, setMails] = useState<any[]>([])
   const [retrying, setRetrying] = useState<Set<string>>(new Set())
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -111,20 +131,42 @@ export default function OutboxPage() {
           minWidth: 0,
         }}
       >
-        {/* Header */}
-        <div style={{ padding: "20px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", gap: "10px" }}>
+        {/* Header with Back button for mobile navigation */}
+        <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", gap: "10px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-              <Send size={24} color="var(--gold-mid)" style={{ flexShrink: 0 }} />
+              <button
+                onClick={() => router.push("/dashboard/inbox")}
+                style={{
+                  background: "var(--mail-row-border, #141414)",
+                  border: "1px solid var(--border-color, #1F1F1F)",
+                  borderRadius: "50%",
+                  width: "36px",
+                  height: "36px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "var(--gold-mid, #D4AF37)",
+                  flexShrink: 0,
+                  transition: "background 0.2s ease, transform 0.15s ease",
+                }}
+                aria-label="Back to Inbox"
+                title="Back to Inbox"
+              >
+                <ArrowLeft size={17} />
+              </button>
+
               <div style={{ minWidth: 0 }}>
-                <h1 style={{ fontSize: "22px", fontWeight: "800", color: "var(--text-bright)", margin: 0, fontFamily: "Inter, sans-serif", letterSpacing: "-0.01em" }}>
+                <h1 style={{ fontSize: "20px", fontWeight: "800", color: "var(--text-bright)", margin: 0, fontFamily: "Inter, sans-serif", letterSpacing: "-0.01em" }}>
                   Outbox
                 </h1>
                 <p style={{ fontSize: "12px", color: "var(--text-dim)", margin: "2px 0 0 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {mails.length === 0 ? "No queued messages" : `${mails.length} message${mails.length > 1 ? "s" : ""} queued for dispatch`}
+                  {mails.length === 0 ? "No queued messages" : `${mails.length} message${mails.length > 1 ? "s" : ""} queued`}
                 </p>
               </div>
             </div>
+
             <button
               onClick={handleRefresh}
               style={{
@@ -146,7 +188,7 @@ export default function OutboxPage() {
               title="Refresh Outbox"
               aria-label="Refresh Outbox"
             >
-              <RefreshCw size={18} style={{ animation: isRefreshing ? "spin 0.8s linear infinite" : "none" }} />
+              <RefreshCw size={17} style={{ animation: isRefreshing ? "spin 0.8s linear infinite" : "none" }} />
             </button>
           </div>
 
@@ -156,11 +198,11 @@ export default function OutboxPage() {
               background: "rgba(239,68,68,0.06)",
               border: "1px solid rgba(239,68,68,0.2)",
               borderRadius: "10px",
-              padding: "10px 14px",
+              padding: "10px 12px",
               display: "flex",
               alignItems: "flex-start",
               gap: "10px",
-              marginBottom: "4px",
+              marginBottom: "2px",
               width: "100%",
               boxSizing: "border-box",
             }}>
@@ -175,12 +217,31 @@ export default function OutboxPage() {
         {/* Mail list */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", paddingBottom: "calc(88px + env(safe-area-inset-bottom, 0px))" }}>
           {mails.length === 0 ? (
-            <div style={{ padding: "80px 20px", textAlign: "center" }}>
+            <div style={{ padding: "60px 20px", textAlign: "center", width: "100%", margin: "0 auto", maxWidth: "360px" }}>
               <div style={{ fontSize: "44px", marginBottom: "16px", opacity: 0.35 }}>📤</div>
-              <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "6px" }}>Outbox is clear</h3>
-              <p style={{ color: "var(--text-dim)", fontSize: "13px", maxWidth: "260px", margin: "0 auto", lineHeight: 1.5 }}>
-                All messages sent successfully.
+              <h3 style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-bright)", marginBottom: "6px" }}>Outbox is clear</h3>
+              <p style={{ color: "var(--text-dim)", fontSize: "13px", lineHeight: 1.5, marginBottom: "20px" }}>
+                All outgoing messages have been sent. Messages that fail to dispatch will appear here.
               </p>
+              <button
+                onClick={() => router.push("/dashboard/inbox")}
+                style={{
+                  background: "rgba(212, 175, 55, 0.1)",
+                  color: "var(--gold-mid)",
+                  border: "1px solid rgba(212, 175, 55, 0.25)",
+                  padding: "8px 18px",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <ArrowLeft size={14} /> Go to Inbox
+              </button>
             </div>
           ) : (
             mails.map(mail => {
@@ -188,9 +249,8 @@ export default function OutboxPage() {
               const isSelected = selectedId === mail.id
               const originalSubject = mail.originalParams?.subject || mail.subject?.replace(/^⚠️ Failed: /, "") || "(No subject)"
               const recipient = mail.originalParams?.recipientEmail || mail.receiverEmail || "Unknown recipient"
-              const formattedTime = mail.time && !isNaN(Date.parse(mail.time))
-                ? new Date(mail.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                : "Queued"
+              const formattedTime = formatOutboxTime(mail.time)
+              const snippet = mail.originalParams?.message?.slice(0, 120) || mail.message?.slice(0, 120) || ""
 
               return (
                 <div
@@ -198,63 +258,75 @@ export default function OutboxPage() {
                   onClick={() => setSelectedId(isSelected ? null : mail.id)}
                   className={`mail-row ${isSelected ? "selected" : ""}`}
                   style={{
-                    padding: "12px 16px",
+                    padding: "12px 14px",
                     borderBottom: "1px solid var(--mail-row-border, #141414)",
                     cursor: "pointer",
                     background: isSelected ? "rgba(239,68,68,0.08)" : "transparent",
                     borderLeft: isSelected ? "3px solid #ef4444" : "3px solid transparent",
                     transition: "background 0.15s ease",
                     position: "relative",
-                    minHeight: "56px",
+                    minHeight: "62px",
                     display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
+                    alignItems: "flex-start",
+                    gap: "10px",
                     width: "100%",
                     boxSizing: "border-box",
                   }}
                   onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "var(--bg-hover)" }}
                   onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%", minWidth: 0 }}>
-                    {/* Avatar */}
-                    <div style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background: "rgba(239,68,68,0.12)",
-                      border: "1.5px solid rgba(239,68,68,0.3)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                      {isRetryingThis
-                        ? <RefreshCw size={15} color="#ef4444" style={{ animation: "spin 1s linear infinite" }} />
-                        : <AlertTriangle size={15} color="#ef4444" />
-                      }
-                    </div>
-
-                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "2px", overflow: "hidden" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", width: "100%" }}>
-                        <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-bright)", fontFamily: "Inter, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
-                          To: {recipient.split("@")[0]}
-                        </span>
-                        <span style={{ fontSize: "11px", color: "var(--text-dim)", flexShrink: 0, whiteSpace: "nowrap" }}>
-                          {formattedTime}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: "13px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%" }}>
-                        {originalSubject}
-                      </div>
-                      {mail.error && (
-                        <div style={{ fontSize: "11px", color: "#ef4444", opacity: 0.85, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%" }}>
-                          {mail.error}
-                        </div>
-                      )}
-                    </div>
-
-                    <ChevronRight size={14} color="var(--text-dim)" style={{ flexShrink: 0, opacity: isSelected ? 1 : 0.4 }} />
+                  {/* Status Avatar */}
+                  <div style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: "rgba(239,68,68,0.12)",
+                    border: "1.5px solid rgba(239,68,68,0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "2px",
+                  }}>
+                    {isRetryingThis
+                      ? <RefreshCw size={15} color="#ef4444" style={{ animation: "spin 1s linear infinite" }} />
+                      : <AlertTriangle size={15} color="#ef4444" />
+                    }
                   </div>
+
+                  {/* Mail Row Info */}
+                  <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "2px", overflow: "hidden" }}>
+                    {/* Line 1: Recipient + Timestamp */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", width: "100%" }}>
+                      <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-bright)", fontFamily: "Inter, sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
+                        To: {recipient.split("@")[0]}
+                      </span>
+                      <span style={{ fontSize: "11px", color: "var(--text-dim)", flexShrink: 0, whiteSpace: "nowrap" }}>
+                        {formattedTime}
+                      </span>
+                    </div>
+
+                    {/* Line 2: Subject */}
+                    <div style={{ fontSize: "13px", color: "var(--text-bright)", fontWeight: "500", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%" }}>
+                      {originalSubject}
+                    </div>
+
+                    {/* Line 3: Message preview snippet */}
+                    {snippet && (
+                      <div style={{ fontSize: "12px", color: "var(--text-dim)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%" }}>
+                        {snippet}
+                      </div>
+                    )}
+
+                    {/* Line 4: Error details (if any) */}
+                    {mail.error && (
+                      <div style={{ fontSize: "11px", color: "#ef4444", opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "100%", marginTop: "1px" }}>
+                        ⚠️ {mail.error}
+                      </div>
+                    )}
+                  </div>
+
+                  <ChevronRight size={14} color="var(--text-dim)" style={{ flexShrink: 0, opacity: isSelected ? 1 : 0.4, marginTop: "10px" }} />
                 </div>
               )
             })
@@ -278,7 +350,7 @@ export default function OutboxPage() {
               display: "flex",
               flexDirection: "column",
               background: "var(--bg-body)",
-              padding: "32px 36px 40px",
+              padding: "24px 20px 40px",
               borderLeft: "1px solid var(--border-color, #1F1F1F)",
               position: "relative",
               overflowY: "auto",
@@ -289,15 +361,15 @@ export default function OutboxPage() {
             }}
           >
             {/* Top Navigation Row with Back Button */}
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "24px", width: "100%", minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px", width: "100%", minWidth: 0 }}>
               <button
                 onClick={() => setSelectedId(null)}
                 style={{
                   background: "var(--mail-row-border, #141414)",
                   border: "1px solid var(--border-color, #1F1F1F)",
                   borderRadius: "50%",
-                  width: "38px",
-                  height: "38px",
+                  width: "36px",
+                  height: "36px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -309,13 +381,13 @@ export default function OutboxPage() {
                 aria-label="Back to outbox list"
                 title="Back to Outbox list"
               >
-                <ArrowLeft size={18} />
+                <ArrowLeft size={17} />
               </button>
 
               <h1
                 className="mail-detail-subject"
                 style={{
-                  fontSize: "22px",
+                  fontSize: "20px",
                   fontWeight: "700",
                   color: "var(--text-bright)",
                   margin: 0,
@@ -337,7 +409,7 @@ export default function OutboxPage() {
               border: "1px solid rgba(239,68,68,0.2)",
               borderRadius: "12px",
               padding: "14px 16px",
-              marginBottom: "24px",
+              marginBottom: "20px",
               display: "flex",
               alignItems: "flex-start",
               gap: "12px",
@@ -366,7 +438,7 @@ export default function OutboxPage() {
             </div>
 
             {/* Metadata (To, CC, BCC, Time) */}
-            <div className="mail-detail-meta" style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px", width: "100%" }}>
+            <div className="mail-detail-meta" style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px", width: "100%" }}>
               <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", flexWrap: "wrap", width: "100%" }}>
                 <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", width: "36px", textTransform: "uppercase", paddingTop: "4px", flexShrink: 0 }}>To</span>
                 <span style={{
@@ -405,7 +477,7 @@ export default function OutboxPage() {
             </div>
 
             {/* Action buttons */}
-            <div style={{ display: "flex", gap: "10px", marginBottom: "32px", flexWrap: "wrap", width: "100%" }}>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "28px", flexWrap: "wrap", width: "100%" }}>
               <button
                 onClick={() => handleRetry(selectedMail)}
                 disabled={isRetryingThis}
@@ -497,5 +569,13 @@ export default function OutboxPage() {
         )
       })()}
     </div>
+  )
+}
+
+export default function OutboxPage() {
+  return (
+    <Suspense fallback={null}>
+      <OutboxPageContent />
+    </Suspense>
   )
 }
