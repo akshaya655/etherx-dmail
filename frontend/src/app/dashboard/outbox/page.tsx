@@ -194,20 +194,37 @@ function OutboxPageContent() {
 
           {/* Info banner */}
           {mails.length > 0 && (
-            <div style={{
-              background: "rgba(239,68,68,0.06)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "10px",
-              padding: "10px 12px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "10px",
-              marginBottom: "2px",
-              width: "100%",
-              boxSizing: "border-box",
-            }}>
+            <div
+              className="outbox-info-banner"
+              style={{
+                background: "rgba(239,68,68,0.06)",
+                border: "1px solid rgba(239,68,68,0.2)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                marginBottom: "2px",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                whiteSpace: "normal",
+                writingMode: "horizontal-tb",
+              }}
+            >
               <AlertTriangle size={15} color="#ef4444" style={{ flexShrink: 0, marginTop: "2px" }} />
-              <p style={{ fontSize: "12px", color: "#ef4444", margin: 0, lineHeight: 1.45, wordBreak: "break-word", overflowWrap: "break-word" }}>
+              <p style={{
+                fontSize: "12px",
+                color: "#ef4444",
+                margin: 0,
+                lineHeight: 1.45,
+                wordBreak: "normal",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+                writingMode: "horizontal-tb",
+                flex: 1,
+                minWidth: 0,
+              }}>
                 These messages failed to send. Click a message to <strong>Retry</strong> or <strong>Discard</strong>.
               </p>
             </div>
@@ -404,21 +421,43 @@ function OutboxPageContent() {
             </div>
 
             {/* Failed banner */}
-            <div style={{
-              background: "rgba(239,68,68,0.06)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "12px",
-              padding: "14px 16px",
-              marginBottom: "20px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px",
-              width: "100%",
-              boxSizing: "border-box",
-            }}>
+            <div
+              className="outbox-failed-banner"
+              style={{
+                background: "rgba(239,68,68,0.06)",
+                border: "1px solid rgba(239,68,68,0.2)",
+                borderRadius: "12px",
+                padding: "14px 16px",
+                marginBottom: "20px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+                width: "100%",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                whiteSpace: "normal",
+                writingMode: "horizontal-tb",
+              }}
+            >
               <AlertTriangle size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: "2px" }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "14px", fontWeight: "700", color: "#ef4444", marginBottom: "4px" }}>
+              <div style={{
+                flex: 1,
+                minWidth: 0,
+                width: "100%",
+                whiteSpace: "normal",
+                writingMode: "horizontal-tb",
+              }}>
+                <div style={{
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#ef4444",
+                  marginBottom: "4px",
+                  whiteSpace: "normal",
+                  writingMode: "horizontal-tb",
+                  wordBreak: "normal",
+                  overflowWrap: "break-word",
+                  width: "100%",
+                }}>
                   Message failed to send
                 </div>
                 {selectedMail.error && (
@@ -430,6 +469,9 @@ function OutboxPageContent() {
                     wordBreak: "break-word",
                     overflowWrap: "anywhere",
                     lineHeight: 1.4,
+                    whiteSpace: "normal",
+                    writingMode: "horizontal-tb",
+                    width: "100%",
                   }}>
                     {selectedMail.error}
                   </div>

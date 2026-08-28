@@ -4237,11 +4237,33 @@ body {
     flex-wrap: nowrap;
   }
 
-  /* 26. PREVENT LONG WORDS CAUSING WIDTH OVERFLOW */
-  p, span, div, h1, h2, h3, h4, li {
+  /* 26. PREVENT LONG WORDS CAUSING WIDTH OVERFLOW SAFELY */
+  p, h1, h2, h3, h4, li {
     overflow-wrap: break-word;
-    word-break: break-word;
     max-width: 100%;
+  }
+
+  /* 27. TOAST & ALERT BANNERS — Horizontal wrapping, prevent vertical stacking */
+  .outbox-failed-banner,
+  .outbox-info-banner,
+  .global-toast-notification,
+  .error-banner {
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    writing-mode: horizontal-tb !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    box-sizing: border-box !important;
+  }
+
+  .outbox-failed-banner *,
+  .outbox-info-banner *,
+  .global-toast-notification * {
+    white-space: normal !important;
+    writing-mode: horizontal-tb !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
   }
 }
 

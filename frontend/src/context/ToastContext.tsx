@@ -68,6 +68,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             fontSize: "13px",
             fontWeight: "600",
             maxWidth: "calc(100vw - 32px)",
+            width: "auto",
+            whiteSpace: "normal",
+            writingMode: "horizontal-tb",
+            boxSizing: "border-box",
             animation: "toastSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
           }}
         >
@@ -80,12 +84,17 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               .global-toast-notification {
                 left: 16px !important;
                 right: 16px !important;
+                width: auto !important;
+                max-width: calc(100vw - 32px) !important;
                 bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-                justify-content: space-between;
+                justify-content: space-between !important;
+                white-space: normal !important;
+                writing-mode: horizontal-tb !important;
+                box-sizing: border-box !important;
               }
             }
           `}</style>
-          <span>{toast.message}</span>
+          <span style={{ whiteSpace: "normal", writingMode: "horizontal-tb", wordBreak: "normal", overflowWrap: "break-word", flex: 1, minWidth: 0 }}>{toast.message}</span>
           {toast.actionLabel && (
             <button
               onClick={() => {
@@ -101,6 +110,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                 cursor: "pointer",
                 padding: "2px 6px",
                 borderRadius: "4px",
+                flexShrink: 0,
+                whiteSpace: "nowrap",
                 transition: "background 0.2s"
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = "rgba(212,175,55,0.15)"}
