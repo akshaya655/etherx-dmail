@@ -81,11 +81,15 @@ const MailRow = memo(({
   }, [])
 
   const nameToDisplay = showToRecipient
-    ? (mail.receiverName || mail.receiverEmail?.split("@")[0] || "Unknown")
+    ? (mail.receiverName || mail.receiverEmail?.split("@")[0] || mail.originalParams?.recipientEmail?.split("@")[0] || "Unknown")
     : (mail.senderName || mail.senderEmail?.split("@")[0] || "Unknown")
 
   const senderInitial = nameToDisplay.charAt(0).toUpperCase()
-  const avatarColors = getAvatarColor(mail.senderEmail || mail.senderName || mail.id || "default")
+  const avatarColors = getAvatarColor(
+    showToRecipient
+      ? (mail.receiverEmail || mail.originalParams?.recipientEmail || mail.receiverName || mail.id || "default")
+      : (mail.senderEmail || mail.senderName || mail.id || "default")
+  )
 
   const subject = mail.subject || "(No subject)"
   const snippet = preview !== "none" ? cleanMessage(mail.message || "").slice(0, 120) : ""
