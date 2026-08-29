@@ -357,7 +357,8 @@ function OutboxPageContent() {
           padding: "32px 40px 40px",
           borderLeft: "1px solid #141414",
           position: "relative",
-          overflowY: "auto"
+          overflowY: "auto",
+          minWidth: 0
         }}
       >
         {/* Header Navigation with Back Button */}
