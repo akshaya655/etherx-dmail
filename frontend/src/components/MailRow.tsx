@@ -2,7 +2,7 @@
 import { memo, useState, useEffect } from "react"
 import { Lock, Star, Check, Paperclip, Archive, Trash2, Mail, MailOpen, Clock } from "lucide-react"
 import { cleanMessage } from "@/utils/gun"
-import { updateMailInStore } from "@/utils/mailStore"
+import { updateMailInStore, isMailFailed } from "@/utils/mailStore"
 import { useToast } from "@/context/ToastContext"
 
 interface MailRowProps {
@@ -80,13 +80,17 @@ const MailRow = memo(({
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  const nameToDisplay = showToRecipient
+  const isFailed = isMailFailed(mail)
+  const effectiveShowToRecipient = showToRecipient || isFailed
+  const effectiveBadge = badge || (isFailed ? { label: "Failed", color: "#ef4444" } : undefined)
+
+  const nameToDisplay = effectiveShowToRecipient
     ? (mail.receiverName || mail.receiverEmail?.split("@")[0] || mail.originalParams?.recipientEmail?.split("@")[0] || "Unknown")
     : (mail.senderName || mail.senderEmail?.split("@")[0] || "Unknown")
 
   const senderInitial = nameToDisplay.charAt(0).toUpperCase()
   const avatarColors = getAvatarColor(
-    showToRecipient
+    effectiveShowToRecipient
       ? (mail.receiverEmail || mail.originalParams?.recipientEmail || mail.receiverName || mail.id || "default")
       : (mail.senderEmail || mail.senderName || mail.id || "default")
   )
@@ -162,7 +166,14 @@ const MailRow = memo(({
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               flex: 1, fontFamily: "Inter, sans-serif",
             }}>
-              {showToRecipient ? "To: " : ""}{nameToDisplay}
+              {effectiveShowToRecipient ? "To: " : ""}{nameToDisplay}
+              {effectiveBadge && (
+                <span style={{
+                  fontSize: "9px", padding: "1px 5px", borderRadius: "5px",
+                  background: `${effectiveBadge.color}22`, border: `1px solid ${effectiveBadge.color}44`,
+                  color: effectiveBadge.color, fontWeight: "800", textTransform: "uppercase", marginLeft: "6px"
+                }}>{effectiveBadge.label}</span>
+              )}
               {mail.message?.includes("-----BEGIN PGP MESSAGE-----") && (
                 <Lock size={10} color="var(--gold-mid)" style={{ marginLeft: "4px", display: "inline" }} />
               )}
@@ -198,15 +209,14 @@ const MailRow = memo(({
         <button
           onClick={e => onToggleStar(mail.id, e)}
           style={{
-            background: "none", border: "none", cursor: "pointer",
-            padding: "4px", flexShrink: 0,
+            background: "none", border: "none", padding: "4px", cursor: "pointer",
             color: mail.isStarred ? "var(--gold-mid)" : "var(--text-dim)",
             opacity: mail.isStarred ? 1 : 0.4,
-            display: "flex", alignItems: "flex-start", marginTop: "2px",
-            minWidth: "32px", minHeight: "32px", justifyContent: "center",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            marginTop: "2px", flexShrink: 0,
           }}
         >
-          <Star size={15} fill={mail.isStarred ? "var(--gold-mid)" : "none"} strokeWidth={mail.isStarred ? 0 : 1.5} />
+          <Star size={16} fill={mail.isStarred ? "var(--gold-mid)" : "none"} strokeWidth={mail.isStarred ? 0 : 1.8} />
         </button>
 
         {/* Unread dot */}
@@ -222,7 +232,7 @@ const MailRow = memo(({
   }
 
   // ─────────────────────────────────────────────────
-  // Desktop: Original full-width single-line layout
+  // Desktop: Standard compact line row
   // ─────────────────────────────────────────────────
   return (
     <div
@@ -230,9 +240,9 @@ const MailRow = memo(({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
+        height: rowHeight,
         display: "flex",
         alignItems: "center",
-        height: rowHeight,
         padding: "0 16px",
         borderBottom: "1px solid #141414",
         cursor: "pointer",
@@ -241,10 +251,14 @@ const MailRow = memo(({
           ? "linear-gradient(90deg, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.06) 60%, rgba(212,175,55,0.02) 100%)"
           : isSelectedInBulk
           ? "rgba(212, 175, 55, 0.10)"
-          : isUnread ? "rgba(255,255,255,0.02)" : "transparent",
+          : isHovered
+          ? "rgba(255,255,255,0.025)"
+          : isUnread
+          ? "rgba(255,255,255,0.015)"
+          : "transparent",
         boxShadow: isSelected ? "inset 0 0 0 1px rgba(212,175,55,0.12)" : "none",
-        transition: "background 0.15s ease, box-shadow 0.15s ease",
         userSelect: "none",
+        transition: "background 0.15s ease",
       }}
     >
       {/* Selected indicator bar */}
@@ -284,25 +298,22 @@ const MailRow = memo(({
       </div>
 
       {/* Sender name */}
-      <div style={{
-        width: "160px", flexShrink: 0, marginRight: "12px",
-        display: "flex", alignItems: "center", gap: "6px", overflow: "hidden"
-      }}>
+      <div style={{ width: "160px", flexShrink: 0, display: "flex", alignItems: "center", gap: "6px", marginRight: "12px" }}>
         <span style={{
           fontSize: "13px",
           fontWeight: isUnread ? "700" : "500",
           color: isUnread ? "var(--text-bright)" : "var(--text-muted)",
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           fontFamily: "Inter, sans-serif",
         }}>
-          {showToRecipient ? "To: " : ""}{nameToDisplay}
+          {effectiveShowToRecipient ? "To: " : ""}{nameToDisplay}
         </span>
-        {badge && (
+        {effectiveBadge && (
           <span style={{
             fontSize: "9px", padding: "1px 5px", borderRadius: "5px",
-            background: `${badge.color}22`, border: `1px solid ${badge.color}44`,
-            color: badge.color, fontWeight: "800", textTransform: "uppercase", flexShrink: 0
-          }}>{badge.label}</span>
+            background: `${effectiveBadge.color}22`, border: `1px solid ${effectiveBadge.color}44`,
+            color: effectiveBadge.color, fontWeight: "800", textTransform: "uppercase", flexShrink: 0
+          }}>{effectiveBadge.label}</span>
         )}
         {mail.message?.includes("-----BEGIN PGP MESSAGE-----") && (
           <Lock size={11} color="var(--gold-mid)" style={{ flexShrink: 0 }} />

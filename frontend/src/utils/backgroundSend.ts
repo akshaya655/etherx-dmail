@@ -17,6 +17,7 @@ interface SendMailParams {
   bcc?: string
   threadId?: string
   parentMessageId?: string
+  existingMailId?: string
 }
 
 export const cleanRecipients = (primaryRecipient: string, rawCc: string = ""): { recipientEmail: string; cleanCc: string } => {
@@ -49,25 +50,27 @@ export const sendMailInBackground = async ({
   recipientEmail: rawRecipient,
   subject,
   message,
-  attachments,
+  attachments = [],
   scheduleDate,
   scheduleTime,
   cc: rawCc = "",
   bcc,
   threadId: threadIdParam,
-  parentMessageId
+  parentMessageId,
+  existingMailId
 }: SendMailParams) => {
   const { recipientEmail, cleanCc: cc } = cleanRecipients(rawRecipient, rawCc)
-  const mailId = `${Date.now()}_${Math.random().toString(36).slice(2)}`
+  const mailId = existingMailId || `${Date.now()}_${Math.random().toString(36).slice(2)}`
   const threadId = threadIdParam || mailId
 
-  // 1. Create a "Pending" entry in the store so the user sees it in 'Sent' or 'Outbox'
+  // 1. Create a "Pending" entry in the store
+  const cleanSub = subject?.replace(/^⚠️ Failed:\s*/, "") || "(No subject)"
   const pendingMail = {
     id: mailId,
     threadId: threadId,
     senderEmail: user.email,
     receiverEmail: recipientEmail,
-    subject,
+    subject: cleanSub,
     message, // Store raw message for optimistic local display
     time: new Date().toISOString(),
     status: recipientEmail === user.email ? "inbox" : "sent",
@@ -77,6 +80,7 @@ export const sendMailInBackground = async ({
     isRead: true, // Sender already read their own message
     hasAttachments: attachments.length > 0,
     attachmentCount: attachments.length,
+    error: null,
   }
   updateMailInStore(mailId, pendingMail)
 
@@ -88,15 +92,16 @@ export const sendMailInBackground = async ({
         // Step A: Recipient Lookup
         const isDmail = isInternalDmailAddress(recipientEmail)
         let recipientData = null
+
         if (isDmail) {
-          recipientData = await new Promise<any>(res => db.getUser(recipientEmail, res))
-          if (!recipientData?.publicKey) {
-            try {
+          try {
+            recipientData = await new Promise<any>(res => db.getUser(recipientEmail, res))
+            if (!recipientData?.publicKey) {
               const { nostr } = await import("@/utils/nostr")
               const meshData = await nostr.find(recipientEmail, true)
               if (meshData?.publicKey) recipientData = meshData
-            } catch { }
-          }
+            }
+          } catch {}
         }
         if (!recipientData) recipientData = { email: recipientEmail, publicKey: null }
 
@@ -252,23 +257,30 @@ export const sendMailInBackground = async ({
           // 🛡️ [Sender Privacy Fix] 
           // Update the local store for the sender with the plaintext message.
           const { updateLocalMailInStore } = await import("@/utils/mailStore")
-          updateLocalMailInStore(mailId, { ...mail, message: message + ipfsRefs, isDecrypted: true, isPending: false, fromCache: false })
+          updateLocalMailInStore(mailId, {
+            ...mail,
+            message: message + ipfsRefs,
+            isDecrypted: true,
+            isPending: false,
+            status: recipientEmail.toLowerCase() === user.email.toLowerCase() ? "inbox" : "sent",
+            error: null,
+            fromCache: false
+          })
         }
 
         console.log(`✅ [BackgroundSend] Dispatch complete for ${recipientEmail}`)
 
       } catch (err: any) {
         console.error("❌ [BackgroundSend] Critical Failure:", err)
-        // Update the pending mail with error status.
-        // Store originalParams so the Outbox page can offer a reliable Retry.
+        const cleanSub = subject?.replace(/^⚠️ Failed:\s*/, "") || "(No subject)"
         updateMailInStore(mailId, {
-          status: "outbox",
+          status: "failed",
           isPending: false,
           error: err?.message || "Failed to send",
-          subject: `⚠️ Failed: ${subject}`,
+          subject: `⚠️ Failed: ${cleanSub}`,
           originalParams: {
             recipientEmail,
-            subject,
+            subject: cleanSub,
             message,
             attachmentMeta: attachments.map(a => ({ name: a.name, size: a.size, type: a.type, cid: a.cid })),
             cc,

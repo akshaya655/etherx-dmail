@@ -25,7 +25,7 @@ function Sidebar({ isOpen, onClose, onCompose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
-  const [counts, setCounts] = useState<{ inbox: number; starred: number; spam: number; drafts: number; request: number; sent: number; outbox: number; allUnread: number }>({ inbox: 0, starred: 0, spam: 0, drafts: 0, request: 0, sent: 0, outbox: 0, allUnread: 0 })
+  const [counts, setCounts] = useState<{ inbox: number; starred: number; spam: number; drafts: number; request: number; sent: number; allUnread: number }>({ inbox: 0, starred: 0, spam: 0, drafts: 0, request: 0, sent: 0, allUnread: 0 })
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [userName, setUserName] = useState("")
   const [userEmail, setUserEmail] = useState("")
@@ -154,20 +154,6 @@ function Sidebar({ isOpen, onClose, onCompose }: SidebarProps) {
             </div>
           </Link>
 
-          <Link title="Outbox" href="/dashboard/outbox" onClick={handleNavClick} className={`menu-link ${isActive("outbox") ? "active" : ""}`}>
-            <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "12px" }}>
-              <Clock size={20} style={{ opacity: isActive("outbox") ? 1 : 0.7 }} />
-              <span style={{ flex: 1, fontSize: "14px" }}>Outbox</span>
-              {counts.outbox > 0 && (
-                <span className="count-badge" style={{
-                  fontSize: "11px", fontWeight: "700",
-                  background: isActive("outbox") ? "var(--gold-mid)" : "rgba(212, 175, 55,0.1)",
-                  color: isActive("outbox") ? "var(--bg-body)" : "var(--gold-mid)",
-                  padding: "2px 8px", borderRadius: "10px"
-                }}>{counts.outbox}</span>
-              )}
-            </div>
-          </Link>
 
           <Link title="Requests" href="/dashboard/requests" onClick={handleNavClick} className={`menu-link ${isActive("requests") ? "active" : ""}`}>
             <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "12px" }}>

@@ -179,6 +179,14 @@ const newestFirst = (a: any, b: any) => {
   return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta)
 }
 
+export const isMailFailed = (m: any): boolean => {
+  if (!m) return false
+  if (m.status === "failed") return true
+  if (m.status === "outbox" && (Boolean(m.error) || Boolean(m.originalParams))) return true
+  if (Boolean(m.error) && m.status !== "sent" && m.status !== "trash" && m.status !== "purged") return true
+  return false
+}
+
 export const getMails = (status: string) => {
   // 🚀 Check cache first
   if (memoizedResults.has(status)) return memoizedResults.get(status)!
@@ -201,14 +209,15 @@ export const getMails = (status: string) => {
   if (status === "starred") {
     result = mails.filter((m) => m.isStarred && m.status !== "trash" && m.status !== "purged" && m.senderStatus !== "deleted").sort(newestFirst)
   } else if (status === "sent") {
-    // Exclude outbox (failed) messages from the Sent view
-    // Force isRead: true — sender has always "read" their own sent mail
+    // Exclude outbox / failed messages from the Sent view
     result = mails.filter((m) =>
       isSender(m) &&
       m.status !== "draft" &&
       m.status !== "trash" &&
       m.status !== "purged" &&
       m.status !== "outbox" &&
+      m.status !== "failed" &&
+      !isMailFailed(m) &&
       m.senderStatus !== "deleted"
     ).map((m) => ({ ...m, isRead: true })).sort(newestFirst)
   } else if (status === "queued") {
@@ -218,7 +227,14 @@ export const getMails = (status: string) => {
   } else if (status === "request") {
     result = mails.filter((m) => m.status === "request" && isReceiver(m)).sort(newestFirst)
   } else if (status === "inbox") {
-    result = mails.filter((m) => isReceiver(m) && m.status === "inbox").sort(newestFirst)
+    result = mails
+      .filter((m) => (isReceiver(m) && m.status === "inbox") || (isSender(m) && isMailFailed(m)))
+      .sort((a, b) => {
+        const aFailed = isMailFailed(a) ? 1 : 0
+        const bFailed = isMailFailed(b) ? 1 : 0
+        if (aFailed !== bFailed) return bFailed - aFailed // Pin failed emails at top of Inbox
+        return newestFirst(a, b)
+      })
   } else if (status === "archive" || status === "archived") {
     result = mails.filter((m) => (m.status === "archive" || m.status === "archived") && m.senderStatus !== "deleted").sort(newestFirst)
   } else {

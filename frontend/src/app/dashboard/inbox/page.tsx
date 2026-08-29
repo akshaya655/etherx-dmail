@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo, useRef, memo, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { decryptMessage, encryptMessage, db, cleanMessage, decryptVaultKey, derivePGPPassphrase, validatePGPHeader, getOpenPGP } from "@/utils/gun"
-import { Star, MoreVertical, Archive, Trash2, Mail, Send, Reply, Forward, Shield, Lock, Bell, Settings, Search, ArrowLeft, Paperclip, Tag, Check, Eye, EyeOff, RefreshCw, Download, Inbox } from "lucide-react"
-import { subscribe, updateMailInStore, getMails, initMailStore, getAllRaw } from "@/utils/mailStore"
+import { Star, MoreVertical, Archive, Trash2, Mail, Send, Reply, Forward, Shield, Lock, Bell, Settings, Search, ArrowLeft, Paperclip, Tag, Check, Eye, EyeOff, RefreshCw, Download, Inbox, RotateCcw, AlertTriangle } from "lucide-react"
+import { subscribe, updateMailInStore, getMails, initMailStore, getAllRaw, isMailFailed } from "@/utils/mailStore"
+import { useToast } from "@/context/ToastContext"
 import { getLabels, getMailLabels, toggleMailLabel, subscribeLabelStore, type Label } from "@/utils/labelStore"
 import { useLabel } from "@/context/LabelContext"
 import MailSkeleton from "@/components/MailSkeleton"
@@ -19,10 +20,12 @@ function InboxPageContent() {
   const searchParams = useSearchParams()
   const urlSearch = searchParams.get("search") || ""
   const { activeLabelId, setActiveLabelId } = useLabel()
+  const { showToast } = useToast()
   
   const [loading, setLoading] = useState(true)
   const [mails, setMails] = useState<any[]>([])
   const [selectedMail, setSelectedMail] = useState<any>(null)
+  const [retrying, setRetrying] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<Tab>("All")
   const [userEmail, setUserEmail] = useState("")
   const [vaultPassword, setVaultPassword] = useState("")
@@ -47,6 +50,56 @@ function InboxPageContent() {
   const [unlockPassword, setUnlockPassword] = useState("")
   const [showUnlockPass, setShowUnlockPass] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
+
+  const handleRetry = async (mail: any) => {
+    if (!mail || retrying.has(mail.id)) return
+
+    const params = mail.originalParams || {
+      recipientEmail: mail.receiverEmail,
+      subject: mail.subject,
+      message: mail.message,
+      attachmentMeta: mail.attachments,
+      cc: mail.cc,
+      bcc: mail.bcc,
+      threadId: mail.threadId
+    }
+
+    if (!params || !params.recipientEmail) {
+      showToast("Original message parameters not found for retry.")
+      return
+    }
+
+    setRetrying(prev => new Set(prev).add(mail.id))
+
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}")
+      if (!user.email) throw new Error("Not logged in")
+
+      const { sendMailInBackground } = await import("@/utils/backgroundSend")
+      sendMailInBackground({
+        user,
+        recipientEmail: params.recipientEmail,
+        subject: params.subject?.replace(/^⚠️ Failed:\s*/, "") || params.subject || "(No subject)",
+        message: params.message || "",
+        attachments: (params.attachmentMeta || []).filter((a: any) => a.type === "ipfs" || a.type === "ipfs_hybrid" || a.cid || a.data),
+        cc: params.cc || "",
+        bcc: params.bcc || "",
+        threadId: params.threadId || mail.threadId || mail.id,
+        existingMailId: mail.id, // 🔥 REUSE EXISTING MAIL ID SO NO DUPLICATES ARE CREATED!
+      })
+
+      showToast("Retrying message send...")
+    } catch (err: any) {
+      console.error("[Inbox] Retry failed:", err)
+      showToast(err?.message || "Retry failed. Please try again.")
+    } finally {
+      setRetrying(prev => {
+        const next = new Set(prev)
+        next.delete(mail.id)
+        return next
+      })
+    }
+  }
   const [unlockError, setUnlockError] = useState("")
   const [sessionPassword, setSessionPassword] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
@@ -509,6 +562,7 @@ function InboxPageContent() {
   const renderDetailView = () => {
     const mail = currentSelectedMail
     if (!mail) return null
+    const isFailed = isMailFailed(mail)
     const isEncrypted = mail.message?.includes("-----BEGIN PGP MESSAGE-----")
 
     // The user requested to only see the single selected email rather than a thread of emails.
@@ -553,6 +607,36 @@ function InboxPageContent() {
           </div>
         </div>
 
+        {/* Failed Notice Banner */}
+        {isFailed && (
+          <div
+            style={{
+              background: "rgba(239,68,68,0.06)",
+              border: "1px solid rgba(239,68,68,0.2)",
+              borderRadius: "12px",
+              padding: "14px 16px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
+              width: "100%",
+              boxSizing: "border-box"
+            }}
+          >
+            <AlertTriangle size={18} color="#ef4444" style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "14px", fontWeight: "700", color: "#ef4444", marginBottom: "4px" }}>
+                Message failed to send
+              </div>
+              {mail.error && (
+                <div style={{ fontSize: "12px", color: "#ef4444", opacity: 0.9, fontFamily: "monospace", wordBreak: "break-word", lineHeight: 1.4 }}>
+                  {mail.error}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Conversation Thread Messages */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginBottom: "24px" }}>
           {threadMails.map((tMail, tIdx) => {
@@ -574,7 +658,7 @@ function InboxPageContent() {
                   <div style={{
                     width: "36px", height: "36px", borderRadius: "50%", flexShrink: 0,
                     background: `linear-gradient(135deg, rgba(212,175,55,0.3) 0%, rgba(212,175,55,0.08) 100%)`,
-                    border: "1px solid rgba(212,175,55,0.3)",
+                    border: "1.5px solid rgba(212,175,55,0.3)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: "14px", fontWeight: "800", color: "var(--gold-mid)"
                   }}>
@@ -601,28 +685,28 @@ function InboxPageContent() {
                     {tMail.message?.slice(0, 100)}...
                   </div>
                 ) : (
-                  <div>
-                    {/* Security Badge */}
-                    <div style={{
-                      background: "rgba(212, 175, 55, 0.04)", border: "1px solid rgba(212, 175, 55, 0.12)",
-                      borderRadius: "8px", padding: "8px 14px", display: "flex", alignItems: "center", gap: "8px",
-                      marginBottom: "16px"
-                    }}>
-                      <Lock size={12} color="var(--gold-mid)" />
-                      <span style={{ fontSize: "10px", color: "rgba(212,175,55,0.6)", fontFamily: "monospace", flex: 1 }}>
-                        {tMail.id?.slice(0, 20)}...
-                      </span>
-                      <span style={{ fontSize: "10px", color: "var(--gold-mid)", fontWeight: "700", textTransform: "uppercase" }}>
-                        {decryptedContent ? "✓ Decrypted" : (isEncrypted ? "✓ Encrypted" : "✓ Verified")}
-                      </span>
-                    </div>
+                  <div style={{ marginTop: "12px" }}>
+                    {/* Encryption status banner */}
+                    {isEncrypted && (
+                      <div style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px",
+                        background: isUnlocked ? "rgba(16, 185, 129, 0.08)" : "rgba(212, 175, 55, 0.08)",
+                        border: isUnlocked ? "1px solid rgba(16, 185, 129, 0.2)" : "1px solid rgba(212, 175, 55, 0.2)",
+                        borderRadius: "10px", padding: "10px 14px", marginBottom: "16px"
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <Shield size={16} color={isUnlocked ? "#10B981" : "var(--gold-mid)"} />
+                          <span style={{ fontSize: "12px", fontWeight: "600", color: isUnlocked ? "#10B981" : "var(--gold-mid)" }}>
+                            {isUnlocked ? "End-to-End Encrypted (PGP/OpenPGP Decrypted)" : "End-to-End Encrypted Message"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Message Body */}
                     <EmailBodyViewer
-                      content={decryptedContent || tMail.message}
+                      content={decryptedContent || tMail.originalParams?.message || tMail.message}
                       html={tMail.html}
-                      minHeight="150px"
-                      style={{ margin: "8px 0" }}
+                      minHeight="120px"
                     />
                   </div>
                 )}
@@ -633,6 +717,21 @@ function InboxPageContent() {
 
         {/* Action Buttons */}
         <div style={{ display: "flex", gap: "8px", marginBottom: "32px", position: "relative", flexWrap: "wrap" }}>
+          {isFailed && (
+            <button
+              onClick={() => handleRetry(mail)}
+              disabled={retrying.has(mail.id)}
+              style={{
+                background: "var(--gold-mid)", color: "#000", border: "none", borderRadius: "8px",
+                padding: "9px 20px", fontSize: "13px", fontWeight: "700", cursor: retrying.has(mail.id) ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", gap: "7px", boxShadow: "0 4px 15px rgba(212,175,55,0.25)",
+                transition: "all 0.2s"
+              }}
+            >
+              {retrying.has(mail.id) ? <RefreshCw size={15} style={{ animation: "spin 1s linear infinite" }} /> : <RotateCcw size={15} />}
+              {retrying.has(mail.id) ? "Retrying..." : "Retry Send"}
+            </button>
+          )}
           <button
             onClick={() => setReplyMode("reply")}
             style={{ background: "var(--gold-mid)", color: "#000", border: "none", borderRadius: "8px", padding: "9px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", gap: "7px", boxShadow: "0 4px 15px rgba(212,175,55,0.25)", transition: "all 0.2s" }}
